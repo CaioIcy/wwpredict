@@ -1,6 +1,9 @@
 from enum import Enum
 
 
+doDebug = False
+
+
 class Role(Enum):
     Villager = 1
     Drunk = 2
@@ -32,6 +35,11 @@ class Role(Enum):
     Mayor = 28
     Prince = 29
     # MaybeSeer      = 30
+
+
+def debug(msg):
+    if(doDebug):
+        print(msg)
 
 
 def getStrength(role, allRoles):
@@ -86,62 +94,76 @@ def getStrength(role, allRoles):
         return 4
     elif(role == Role.Prince):
         return 3
-
     elif(role == Role.Cursed):
-        return 666  # 1 - allRoles.Count(x => wolfRoles.Contains(x)) / 2
+        # 1 - allRoles.Count(x => wolfRoles.Contains(x)) / 2
+        return 1 - (len([role for role in allRoles if role in wolfRoles]) / 2)
     elif(role == Role.Cultist):
-        return 666  # 10 + allRoles.Count(x => !nonConvertibleRoles.Contains(x))
+        # 10 + allRoles.Count(x => !nonConvertibleRoles.Contains(x))
+        return 10 + len([role for role in allRoles if role not in nonConvertibleRoles])
     elif(role == Role.CultistHunter):
-        return 666  # allRoles.Count(x => x == Role.Cultist) == 0 ? 1 : 7
+        # allRoles.Count(x => x == Role.Cultist) == 0 ? 1 : 7
+        return 7 if Role.Cultist in allRoles else 1
     elif(role == Role.Mason):
-        return 666  # allRoles.Count(x => x == Role.Mason) <= 1 ? 1 : allRoles.Count(x => x == Role.Mason) + 3
+        # allRoles.Count(x => x == Role.Mason) <= 1 ? 1 : allRoles.Count(x => x == Role.Mason) + 3
+        return allRoles.count(Role.Mason) + 3 if allRoles.count(Role.Mason) > 1 else 1
     elif(role == Role.Beholder):
+        # 2 + (allRoles.Any(x => x == IRole.Seer) ? 4 : 0)
         return 2 + (4 if Role.Seer in allRoles else 0)
     elif(role == Role.Tanner):
-        return 666  # allRoles.Count / 2
+        # allRoles.Count / 2
+        return len(allRoles) / 2
     else:
         raise RuntimeError
 
 
-def main():
-    print("Init.\n")
+def report(roles):
+    debug("Init.\n")
     nvgroles = [Role.Cultist, Role.SerialKiller, Role.Tanner, Role.Wolf,
                 Role.AlphaWolf, Role.Sorcerer, Role.WolfCub]
-    nPlayers = 6
+    nPlayers = len(roles)
     varianceAllowed = (nPlayers / 4) + 1
 
-    roles = [Role.ClumsyGuy, Role.Doppelganger, Role.Beholder,
-             Role.SerialKiller, Role.Hunter, Role.Blacksmith]
-    print("Roles:")
+    debug("Roles:")
     for role in roles:
-        print("-> " + str(role) + " (" + str(getStrength(role, roles)) + ")")
-    print("")
+        debug("-> " + str(role) + " (" + str(getStrength(role, roles)) + ")")
+    debug("")
 
     vgRoles = [r for r in roles if (r not in nvgroles)]
     vgStrength = 0
-    print("Village roles:")
+    debug("Village roles:")
     for role in vgRoles:
         roleStrength = getStrength(role, roles)
-        print("-> " + str(role) + " (" + str(roleStrength) + ")")
+        debug("-> " + str(role) + " (" + str(roleStrength) + ")")
         vgStrength += roleStrength
-    print("**** Village strength is: " + str(vgStrength) + " ****\n")
+    debug("**** Village strength is: " + str(vgStrength) + " ****\n")
 
     nonVgRoles = [r for r in roles if (r in nvgroles)]
     nonVgStrength = 0
-    print("Non-village roles:")
+    debug("Non-village roles:")
     for role in nonVgRoles:
         roleStrength = getStrength(role, roles)
-        print("-> " + str(role) + " (" + str(roleStrength) + ")")
+        debug("-> " + str(role) + " (" + str(roleStrength) + ")")
         nonVgStrength += roleStrength
-    print("**** Non-village strength is: " + str(nonVgStrength) + " ****\n")
+    debug("**** Non-village strength is: " + str(nonVgStrength) + " ****\n")
 
     totalStrength = abs(vgStrength - nonVgStrength)
-    print("Strength is: " + str(totalStrength))
-    if(totalStrength < varianceAllowed):
-        print("Inside allowed variance (" + str(varianceAllowed) + ")")
+    debug("Strength is: " + str(totalStrength))
 
-    print("\nDone.")
+    balanced = (totalStrength <= varianceAllowed)
+    if(balanced):
+        print("[OK] Inside allowed variance (" + str(totalStrength) + " <= " + str(varianceAllowed) + ")")
+    else:
+        print("[FAIL] Outisde allowed variance (" + str(totalStrength) + " > " + str(varianceAllowed) + "):\n " + str(roles))
 
+    debug("\nDone.")
+
+def main():
+    report([Role.ClumsyGuy, Role.AlphaWolf, Role.Doppelganger, Role.Mason, Role.Mason])  # 5
+    report([Role.ClumsyGuy, Role.Doppelganger, Role.Beholder, Role.SerialKiller, Role.Hunter, Role.Blacksmith])  # 6
+    report([Role.Prince, Role.Sorcerer, Role.Harlot, Role.Drunk, Role.WildChild, Role.WolfCub, Role.Cursed])  # 7
+    report([Role.Drunk, Role.Tanner, Role.Mason, Role.Villager, Role.Hunter, Role.AlphaWolf, Role.Gunner])  # 7
+    report([Role.Prince, Role.Villager, Role.Villager, Role.AlphaWolf, Role.GuardianAngel, Role.Fool, Role.Tanner, Role.Doppelganger])  # 8
+    report([Role.Villager, Role.Mayor, Role.Villager, Role.Seer, Role.Cultist, Role.WolfCub, Role.ApprenticeSeer, Role.Cupid, Role.Prince, Role.Villager, Role.CultistHunter])  # 11
 
 if __name__ == '__main__':
     main()
