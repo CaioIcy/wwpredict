@@ -32,12 +32,9 @@ class Role(Enum):
     ClumsyGuy = 27
     Mayor = 28
     Prince = 29
-    # MaybeSeer      = 30
-
 
     def __repr__(self):
         return str(self)
-
 
     def strength(self, allRoles):
         if(self == Role.Villager):
@@ -87,42 +84,40 @@ class Role(Enum):
         elif(self == Role.Prince):
             return 3
         elif(self == Role.Cursed):
-            # 1 - allRoles.Count(x => wolfRoles.Contains(x)) / 2
-            return 1 - (len([role for role in allRoles if role in Role.wolf_roles()]) / 2)
+            wolves = [role for role in allRoles if role in Role.wolves()]
+            return 1 - (len(wolves) / 2)
         elif(self == Role.Cultist):
-            # 10 + allRoles.Count(x => !nonConvertibleRoles.Contains(x))
-            return 10 + len([role for role in allRoles if role not in Role.non_convertible_roles()])
+            convertibles = [role for role in allRoles if role not in
+                            Role.non_convertibles()]
+            return 10 + len(convertibles)
         elif(self == Role.CultistHunter):
-            # allRoles.Count(x => x == Role.Cultist) == 0 ? 1 : 7
             return 7 if Role.Cultist in allRoles else 1
         elif(self == Role.Mason):
-            # allRoles.Count(x => x == Role.Mason) <= 1 ? 1 : allRoles.Count(x => x == Role.Mason) + 3
-            return allRoles.count(Role.Mason) + 3 if allRoles.count(Role.Mason) > 1 else 1
+            mason_count = allRoles.count(Role.Mason)
+            return mason_count + 3 if mason_count > 1 else 1
         elif(self == Role.Beholder):
-            # 2 + (allRoles.Any(x => x == IRole.Seer) ? 4 : 0)
             return 2 + (4 if Role.Seer in allRoles else 0)
         elif(self == Role.Tanner):
-            # allRoles.Count / 2
             return len(allRoles) / 2
         else:
             raise RuntimeError
 
     @staticmethod
-    def non_vg_roles():
+    def non_villagers():
         return [Role.Cultist, Role.SerialKiller, Role.Tanner, Role.Wolf,
                 Role.AlphaWolf, Role.Sorcerer, Role.WolfCub]
 
     @staticmethod
-    def wolf_roles():
+    def wolves():
         return [Role.WolfCub, Role.WolfCub, Role.AlphaWolf]
 
     # The original wolf roles in their code has 2 WolfCubs and leaves Wolf out.
     @staticmethod
-    def wolf_roles_2():
+    def wolves_2():
         return [Role.Wolf, Role.WolfCub, Role.AlphaWolf]
 
     @staticmethod
-    def non_convertible_roles():
+    def non_convertibles():
         return [Role.Seer, Role.GuardianAngel, Role.Detective, Role.Cursed,
                 Role.Harlot, Role.Hunter, Role.Doppelganger, Role.Wolf,
                 Role.AlphaWolf, Role.WolfCub, Role.SerialKiller]
