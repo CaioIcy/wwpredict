@@ -61,6 +61,29 @@ def is_balanced(roles):
     return (final_strength <= get_allowed_variance(len(roles)))
 
 
+def get_possible(role, players, config):
+    wanted = set()
+    if role not in players['certain']:
+        for i, _ in enumerate(players['uncertain']):
+            current_projection = players['uncertain'][:]
+            current_projection[i] = role
+
+            for j, curr_role in enumerate(players['uncertain']):
+                if i == j:
+                    continue
+                c2 = current_projection[:]
+                for non_villager in Role.non_villagers():
+                    if non_villager == role:
+                        continue
+                    c2[j] = non_villager
+                    valid = is_valid(c2 + players['certain'],
+                                     config['allow_cult'], config['allow_tanner'],
+                                     config['allow_fool'])
+                    balanced = config['chaos'] or is_balanced(c2 + players['certain'])
+                    if(valid and balanced):
+                        wanted.add(curr_role)
+    return wanted
+
 def project_truth(players, config):
     assert(config['player_count'] == len(players['certain']) + len(players['uncertain']))
     print("Certain players: " + str(players['certain']))
@@ -93,6 +116,33 @@ def project_truth(players, config):
                     fakers[role] = set()
                 fakers[role].add(possible_role)
 
+    # KMS
+    tanners = get_possible(Role.Tanner, players, config)
+    for rr in tanners:
+        if rr not in fakers:
+            fakers[rr] = set()
+        fakers[rr].add(Role.Tanner)
+    sorcerers = get_possible(Role.Sorcerer, players, config)
+    for rr in sorcerers:
+        if rr not in fakers:
+            fakers[rr] = set()
+        fakers[rr].add(Role.Sorcerer)
+    cursed = get_possible(Role.Cursed, players, config)
+    for rr in cursed:
+        if rr not in fakers:
+            fakers[rr] = set()
+        fakers[rr].add(Role.Cursed)
+    traitors = get_possible(Role.Traitor, players, config)
+    for rr in traitors:
+        if rr not in fakers:
+            fakers[rr] = set()
+        fakers[rr].add(Role.Traitor)
+    wild_children = get_possible(Role.WildChild, players, config)
+    for rr in wild_children:
+        if rr not in fakers:
+            fakers[rr] = set()
+        fakers[rr].add(Role.WildChild)
+
     probably_safe_players = [x for x in players['uncertain'] if x not in fakers.keys()]
     print("Probably safe:")
     for psp in probably_safe_players:
@@ -102,6 +152,6 @@ def project_truth(players, config):
     print("Possibly fake:")
     for faker, possibilities in fakers.items():
         print("-> " + str(faker) + ";")
-        for p in possibilities:
-            print("    => " + str(p))
+        for i, p in enumerate(possibilities):
+            print("    => (" + str(i) + ") " + str(p) + (" *" if p in Role.enemies() else ""))
     print("")

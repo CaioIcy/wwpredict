@@ -21,15 +21,15 @@ def main():
                             datefmt='%Y/%m/%d %H:%M:%S')
 
     config = {
-        'player_count': 5,
+        'player_count': 6,
         'chaos': False,
         'allow_cult': True,
         'allow_tanner': True,
         'allow_fool': True
     }
     players = {
-        'certain': [Role.Mason, Role.Mason],
-        'uncertain': [Role.ClumsyGuy, Role.Detective, Role.Doppelganger]
+        'certain': [Role.Detective, Role.Mason, Role.Cupid, Role.Cursed],
+        'uncertain': [Role.Doppelganger, Role.Traitor]
     }
 
     ww.project_truth(players, config)

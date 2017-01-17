@@ -36,7 +36,7 @@ class Role(Enum):
     def __repr__(self):
         return str(self)
 
-    def strength(self, allRoles):
+    def strength(self, ingame_roles):
         if(self == Role.Villager):
             return 1
         elif(self == Role.Drunk):
@@ -84,21 +84,21 @@ class Role(Enum):
         elif(self == Role.Prince):
             return 3
         elif(self == Role.Cursed):
-            wolves = [role for role in allRoles if role in Role.wolves_2()]
+            wolves = [role for role in ingame_roles if role in Role.wolves_2()]
             return 1 - (len(wolves) / 2)
         elif(self == Role.Cultist):
-            convertibles = [role for role in allRoles if role not in
+            convertibles = [role for role in ingame_roles if role not in
                             Role.non_convertibles()]
             return 10 + len(convertibles)
         elif(self == Role.CultistHunter):
-            return 7 if Role.Cultist in allRoles else 1
+            return 7 if Role.Cultist in ingame_roles else 1
         elif(self == Role.Mason):
-            mason_count = allRoles.count(Role.Mason)
+            mason_count = ingame_roles.count(Role.Mason)
             return mason_count + 3 if mason_count > 1 else 1
         elif(self == Role.Beholder):
-            return 2 + (4 if Role.Seer in allRoles else 0)
+            return 2 + (4 if Role.Seer in ingame_roles else 0)
         elif(self == Role.Tanner):
-            return len(allRoles) / 2
+            return len(ingame_roles) / 2
         else:
             raise RuntimeError
 
