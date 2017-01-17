@@ -84,7 +84,7 @@ class Role(Enum):
         elif(self == Role.Prince):
             return 3
         elif(self == Role.Cursed):
-            wolves = [role for role in allRoles if role in Role.wolves()]
+            wolves = [role for role in allRoles if role in Role.wolves_2()]
             return 1 - (len(wolves) / 2)
         elif(self == Role.Cultist):
             convertibles = [role for role in allRoles if role not in
@@ -109,15 +109,31 @@ class Role(Enum):
 
     @staticmethod
     def wolves():
-        return [Role.WolfCub, Role.WolfCub, Role.AlphaWolf]
+        return [Role.Wolf, Role.WolfCub, Role.AlphaWolf]
 
     # The original wolf roles in their code has 2 WolfCubs and leaves Wolf out.
     @staticmethod
     def wolves_2():
-        return [Role.Wolf, Role.WolfCub, Role.AlphaWolf]
+        return [Role.WolfCub, Role.WolfCub, Role.AlphaWolf]
 
     @staticmethod
     def non_convertibles():
         return [Role.Seer, Role.GuardianAngel, Role.Detective, Role.Cursed,
                 Role.Harlot, Role.Hunter, Role.Doppelganger, Role.Wolf,
                 Role.AlphaWolf, Role.WolfCub, Role.SerialKiller]
+
+    @staticmethod
+    def enemies():
+        return [Role.Wolf, Role.WolfCub, Role.AlphaWolf, Role.SerialKiller,
+                Role.Cultist]
+
+    @staticmethod
+    def all():
+        return [Role.Villager, Role.Drunk, Role.Harlot, Role.Seer, Role.Traitor,
+                Role.GuardianAngel, Role.Detective, Role.Wolf, Role.Cursed,
+                Role.Gunner, Role.Tanner, Role.Fool, Role.WildChild,
+                Role.Beholder, Role.ApprenticeSeer, Role.Cultist,
+                Role.CultistHunter, Role.Mason, Role.Doppelganger, Role.Cupid,
+                Role.Hunter, Role.SerialKiller, Role.Sorcerer, Role.AlphaWolf,
+                Role.WolfCub, Role.Blacksmith, Role.ClumsyGuy, Role.Mayor,
+                Role.Prince]
