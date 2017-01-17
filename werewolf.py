@@ -61,27 +61,47 @@ def is_balanced(roles):
     return (final_strength <= get_allowed_variance(len(roles)))
 
 
-def project_truth(lie_roles):
-    print("Projecting for these roles: " + str(lie_roles))
-    possible_fakers = set()
-    possibilities_per_faker = set()
-    for i, role in enumerate(lie_roles):
-        curr = lie_roles[:]
-        for possible_role in Role.wolves():
-            curr[i] = possible_role
-            balanced = is_balanced(curr)
-            if(balanced):
-                possible_fakers.add(role)
-                possibilities_per_faker.add((role, possible_role))
+def project_truth(player_count, allow_cult, allow_tanner, allow_fool, players):
+    assert(player_count == len(players['certain']) + len(players['uncertain']))
+    print("Certain players: " + str(players['certain']))
+    print("Uncertain players: " + str(players['uncertain']) + "\n")
 
-    if not possible_fakers:
+    print("Safe:")
+    for player in players['certain']:
+        print("-> " + str(player))
+    print("")
+
+    if len(players['uncertain']) == 0:
+        print("No uncertainty to be projected, game is over.")
+        return
+    elif len(players['uncertain']) == 1:
+        print("No uncertainty to be projected.")
+        print("Enemy is " + str(players['uncertain']))
+        return
+
+    fakers = {}
+    for i, role in enumerate(players['uncertain']):
+        curr = players['uncertain'][:]
+        for possible_role in Role.non_villagers():
+            curr[i] = possible_role
+            if(is_balanced(curr + players['certain']) and is_valid(curr + players['certain'], allow_cult, allow_tanner, allow_fool)):
+                if role not in fakers:
+                    fakers[role] = set()
+                fakers[role].add(possible_role)
+
+    if not fakers:
         print("No possible fakers with the given roles.")
         raise
 
-    print("These are the possible fakers:")
-    for role in possible_fakers:
-        print("-> " + str(role) + ";")
-        for p in possibilities_per_faker:
-            if role == p[0]:
-                print("    => " + str(p[1]))
-    print("\n")
+    probably_safe_players = [x for x in players['uncertain'] if x not in fakers.keys()]
+    print("Probably safe:")
+    for psp in probably_safe_players:
+        print("-> " + str(psp) + ";")
+    print("")
+
+    print("Possibly fake:")
+    for faker, possibilities in fakers.items():
+        print("-> " + str(faker) + ";")
+        for p in possibilities:
+            print("    => " + str(p))
+    print("")
