@@ -61,8 +61,8 @@ def is_balanced(roles):
     return (final_strength <= get_allowed_variance(len(roles)))
 
 
-def project_truth(player_count, allow_cult, allow_tanner, allow_fool, players):
-    assert(player_count == len(players['certain']) + len(players['uncertain']))
+def project_truth(players, config):
+    assert(config['player_count'] == len(players['certain']) + len(players['uncertain']))
     print("Certain players: " + str(players['certain']))
     print("Uncertain players: " + str(players['uncertain']) + "\n")
 
@@ -81,17 +81,17 @@ def project_truth(player_count, allow_cult, allow_tanner, allow_fool, players):
 
     fakers = {}
     for i, role in enumerate(players['uncertain']):
-        curr = players['uncertain'][:]
+        current_projection = players['uncertain'][:]
         for possible_role in Role.non_villagers():
-            curr[i] = possible_role
-            if(is_balanced(curr + players['certain']) and is_valid(curr + players['certain'], allow_cult, allow_tanner, allow_fool)):
+            current_projection[i] = possible_role
+            valid = is_valid(current_projection + players['certain'],
+                             config['allow_cult'], config['allow_tanner'],
+                             config['allow_fool'])
+            balanced = config['chaos'] or is_balanced(current_projection + players['certain'])
+            if(valid and balanced):
                 if role not in fakers:
                     fakers[role] = set()
                 fakers[role].add(possible_role)
-
-    if not fakers:
-        print("No possible fakers with the given roles.")
-        raise
 
     probably_safe_players = [x for x in players['uncertain'] if x not in fakers.keys()]
     print("Probably safe:")
