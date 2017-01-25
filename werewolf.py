@@ -116,32 +116,17 @@ def project_truth(players, config):
                     fakers[role] = set()
                 fakers[role].add(possible_role)
 
-    # KMS
-    tanners = get_possible(Role.Tanner, players, config)
-    for rr in tanners:
-        if rr not in fakers:
-            fakers[rr] = set()
-        fakers[rr].add(Role.Tanner)
-    sorcerers = get_possible(Role.Sorcerer, players, config)
-    for rr in sorcerers:
-        if rr not in fakers:
-            fakers[rr] = set()
-        fakers[rr].add(Role.Sorcerer)
-    cursed = get_possible(Role.Cursed, players, config)
-    for rr in cursed:
-        if rr not in fakers:
-            fakers[rr] = set()
-        fakers[rr].add(Role.Cursed)
-    traitors = get_possible(Role.Traitor, players, config)
-    for rr in traitors:
-        if rr not in fakers:
-            fakers[rr] = set()
-        fakers[rr].add(Role.Traitor)
-    wild_children = get_possible(Role.WildChild, players, config)
-    for rr in wild_children:
-        if rr not in fakers:
-            fakers[rr] = set()
-        fakers[rr].add(Role.WildChild)
+    if not fakers:
+        print("The given roles made it impossible to predict. Too much unreliability.")
+        return
+
+    bad_roles = [Role.Tanner, Role.Sorcerer, Role.Cursed, Role.Traitor,
+                 Role.WildChild]
+    for role in bad_roles:
+        for rr in get_possible(role, players, config):
+            if rr not in fakers:
+                fakers[rr] = set()
+            fakers[rr].add(role)
 
     probably_safe_players = [x for x in players['uncertain'] if x not in fakers.keys()]
     print("Probably safe:")
